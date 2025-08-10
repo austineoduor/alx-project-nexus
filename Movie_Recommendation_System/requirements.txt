@@ -1,0 +1,14 @@
+Django>=4.2
+djangorestframework
+psycopg2-binary
+djangorestframework-simplejwt
+requests
+redis
+django-redis
+drf-yasg
+python-dotenv
+gunicorn
+whitenoise
+django-redis
+psycopg2-binary
+dj-database-url
