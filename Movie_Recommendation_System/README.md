@@ -16,19 +16,24 @@ A Django + DRF backend for a movie recommendation app, integrating TMDb API for 
 - TMDb API
 - drf-yasg (Swagger)
 
+### Explore the hosted backend
+    ** copy and paste on a browser
+    [URL: ](https://alx-project-nexus-production-e3c4.up.railway.app/)
+
+
 ## 📦 Setup Instructions
 
 ### 1️⃣ Clone the repo
+
 ```bash
+
 git clone https://github.com/austineoduor/alx-project-nexus.git
 
 cd alx-project-nexus/Movie_Recommendation_System/
 
 ## 📜 API Endpoints
 
-[-URL](https://alx-project-nexus-production-e3c4.up.railway.app/)
-
--Movies
+## -Movies
 
 GET /api/movies/trending/ — trending movies
 
@@ -50,4 +55,5 @@ GET /api/movies/recommended/ — recommended movies
 
 -Documentation
 
-\tGET /api/docs/ — Swagger UI*
+    GET /api/docs/ — Swagger UI
+
