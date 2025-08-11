@@ -48,13 +48,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 class FavoriteMovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteMovie
-        fields = ['favoritemovie_id', 'movie', 'title', 
+        fields = ['id', 'movie', 'title', 
                   'poster_path', 'added_at']
         read_only_fields = fields
 
     swagger_schema_fields = {
         "example": {
-            "favoritemovie_id": "b3a3c2f8-ccf6-4a83-bad5-bd1f6f6c2c99",
+            "id": "1",
             "tmdb_id": 550,
             "added_at": "2025-08-11T15:30:00Z"
         }
