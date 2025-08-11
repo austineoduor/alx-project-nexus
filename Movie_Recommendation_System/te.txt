@@ -1,0 +1,27 @@
+# Django settings
+SIMPLE_JWT_SECRET_KEY=replace_me_jwt
+SECRET_KEY=Op7ugpW9ziO8PkcoyUt6rSzcA8JwAwremtVjpXCSwJU
+DEBUG=True
+ALLOWED_HOSTS=https://alx-project-nexus-production-e3c4.up.railway.app,127.0.0.1,localhost
+
+# Database (PostgreSQL local)
+DATABASE_URL=postgresql://movieuser:kali@localhost:5432/moviedb
+# DB_USER=movieuser
+# DB_PASSWORD=kali
+# DB_HOST=127.0.0.1
+# DB_PORT=5432
+# DB_NAME=moviedb
+
+# Redis settings
+REDIS_URL=redis://localhost:6379/1
+# REDIS_HOST=127.0.0.1
+# REDIS_PORT=6379
+
+# TMDb API key
+TMDB_API_TOKEN=eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3MGIxYzZlYzM3ODYxZGQzZjIzMjVmODY2NmVjYjdlNCIsIm5iZiI6MTc1NDg2MjU3Mi41MjYsInN1YiI6IjY4OTkxM2VjOWU4MWU2ZTYzYjI2N2RlMCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.erZ0-egEraUhWYjWjLwenFhk4MAR_LJ5vQczfsUH7ZA
+TMDB_API_KEY=70b1c6ec37861dd3f2325f8666ecb7e4
+
+# JWT settings
+ACCESS_TOKEN_LIFETIME_MINUTES=60
+REFRESH_TOKEN_LIFETIME_DAYS=7
+
