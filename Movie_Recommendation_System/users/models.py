@@ -20,7 +20,8 @@ class User(AbstractUser):
 class FavoriteMovie(models.Model):
     favoritemovie_id = models.UUIDField(
         primary_key=True,
-        default=uuid.uuid4, 
+        default=uuid.uuid4,
+        unique=True, 
         editable=False
         )
     user = models.ForeignKey(User, related_name='favorites', on_delete=models.CASCADE)
