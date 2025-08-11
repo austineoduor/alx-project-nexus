@@ -33,7 +33,7 @@ class MovieSerializer(serializers.ModelSerializer):
             "id": 1,
             "tmdb_id": 550,
             "title": "Fight Club",
-            "poster_path": "/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg"
+            "poster_url": "/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg"
         }
     }
         
