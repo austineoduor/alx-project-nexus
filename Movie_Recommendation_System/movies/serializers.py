@@ -26,14 +26,13 @@ class TMDbMovieSerializer(serializers.Serializer):
 class MovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
-        fields = ["id", "tmdb_id", "title", "overview", "poster_path"]
+        fields = ["id", "tmdb_id", "title", "poster_path"]
         
     swagger_schema_fields = {
         "example": {
             "id": 1,
             "tmdb_id": 550,
             "title": "Fight Club",
-            "overview": "A depressed man suffering from insomnia meets a strange soap salesman...",
             "poster_path": "/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg"
         }
     }
