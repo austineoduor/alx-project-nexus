@@ -24,8 +24,8 @@ class FavoriteMovie(models.Model):
     #     unique=True, 
     #     editable=False
     #     )
-    user = models.ForeignKey(User, related_name='favorites',null=True, on_delete=models.CASCADE)
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='favorites', on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie,null=True, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     poster_path = models.CharField(max_length=255, blank=True, null=True)
     added_at = models.DateTimeField(auto_now_add=True)
