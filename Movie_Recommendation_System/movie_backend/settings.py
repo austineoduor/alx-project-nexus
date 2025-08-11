@@ -176,5 +176,7 @@ SWAGGER_SETTINGS = {
             'in': 'header',
             'description': 'JWT Authorization header. Example: "Bearer <your_token>"'
         }
-    }
+        
+    },
+    'USE_SESSION_AUTH': False
 }
