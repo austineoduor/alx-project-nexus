@@ -11,7 +11,7 @@ class User(AbstractUser):
         max_length=100,
         help_text="Allowed Letters, digits and @/./+/-/_ only.")
     phone_number = models.IntegerField(
-        max_length=15,
+        max_length=13,
         help_text="Allowed Fortmat: 7xxxxxxxxx")
 
 class FavoriteMovie(models.Model):
