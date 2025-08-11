@@ -18,13 +18,13 @@ class User(AbstractUser):
         help_text="Format: +16044011234")
 
 class FavoriteMovie(models.Model):
-    # favoritemovie_id = models.UUIDField(
-    #     primary_key=True,
-    #     default=uuid.uuid4,
-    #     unique=True, 
-    #     editable=False
-    #     )
-    user = models.ForeignKey(User, related_name='favorites',null=True on_delete=models.CASCADE)
+    favoritemovie_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        unique=True, 
+        editable=False
+        )
+    user = models.ForeignKey(User, related_name='favorites',null=True, on_delete=models.CASCADE)
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     poster_path = models.CharField(max_length=255, blank=True, null=True)
