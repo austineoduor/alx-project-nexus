@@ -4,9 +4,15 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    phone_number = models.IntegerField()
+    first_name = models.CharField(
+        max_length=100,
+        help_text="Allowed Letters, digits and @/./+/-/_ only.")
+    last_name = models.CharField(
+        max_length=100,
+        help_text="Allowed Letters, digits and @/./+/-/_ only.")
+    phone_number = models.IntegerField(
+        max_length=15,
+        help_text="Allowed Fortmat: 7xxxxxxxxx")
 
 class FavoriteMovie(models.Model):
     favoritemovie_id = models.UUIDField(
