@@ -25,15 +25,21 @@ schema_view = get_schema_view(
         title="Movie Recommendation API",
         default_version='v1',
         description="Backend API for Movie Recommendation App",
-        contact=openapi.Contact(email="support@example.com"),
+        contact=openapi.Contact(email="austineoduor57@gmail.com"),
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
+    authentication_classes=[],
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/movies/', include('movies.urls')),
-    path('api/users/', include('users.urls')),
+
+    # App endpoints
+    path("api/", include("movies.urls")),
+    path("api/", include("users.urls")),
+
+    # Swagger & Redoc docs
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

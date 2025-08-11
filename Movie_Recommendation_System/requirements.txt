@@ -12,3 +12,6 @@ whitenoise
 django-redis
 psycopg2-binary
 dj-database-url
+django-phonenumber-field
+"django-phonenumber-field[phonenumbers]"
+"django-phonenumber-field[phonenumberslite]"

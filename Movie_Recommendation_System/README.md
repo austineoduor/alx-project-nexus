@@ -19,7 +19,33 @@ A Django + DRF backend for a movie recommendation app, integrating TMDb API for 
 ### Explore the hosted backend
     ** copy and paste on a browser
     [URL: ](https://alx-project-nexus-production-e3c4.up.railway.app/)
+    
+## Quick test flow (curl)
+    Register
 
+
+    curl -X POST https://127.0.0.1;8080/api/users/register/ \
+    -H "Content-Type: application/json" \
+    -d '{"username":"alice","email":"a@example.com","password":"secret123"}'
+
+## To Obtain tokens (login)
+
+    curl -X POST https://127.0.0.1;8080/api/users/token/ \
+    -H "Content-Type: application/json" \
+    -d '{"username":"alice","password":"secret123"}'
+    
+    - Response contains:
+        {"access":"<ACCESS_TOKEN>", "refresh":"<REFRESH_TOKEN>"}
+
+## Call protected endpoint
+
+    curl -X GET https://<your-host>/api/users/favorites/ \
+    -H "Authorization: Bearer <ACCESS_TOKEN>"
+
+## Refresh access token
+    curl -X POST https://<your-host>/api/users/token/refresh/ \
+    -H "Content-Type: application/json" \
+    -d '{"refresh":"<REFRESH_TOKEN>"}'
 
 ## 📦 Setup Instructions
 

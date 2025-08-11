@@ -1,11 +1,21 @@
 from django.urls import path
-from .views import RegisterView, FavoriteMovieListCreateView, FavoriteMovieDeleteView
+from .views import (RegisterView,
+                    FavoriteMovieListCreateView,
+                    AddFavoriteMovieView,
+                    FavoriteMovieDeleteView
+                    )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='register'),
-    path('login/', TokenObtainPairView.as_view(), name='login'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+
+    # Authentication
+    path('auth/register/', RegisterView.as_view(), name='register'),
+    path('auth/login/', TokenObtainPairView.as_view(), name='login'),
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+
+    # Favorites
+    
     path('favorites/', FavoriteMovieListCreateView.as_view(), name='favorite-list-create'),
+    path("favorites/add/", AddFavoriteMovieView.as_view(), name="favorite-add"),
     path('favorites/<int:movie_id>/', FavoriteMovieDeleteView.as_view(), name='favorite-delete'),
 ]

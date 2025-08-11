@@ -7,7 +7,7 @@ __pycache__/
 *.so
 .env
 venv
-
+Dockerfile
 # Distribution / packaging
 .Python
 build/
