@@ -26,29 +26,28 @@ cd alx-project-nexus/Movie_Recommendation_System/
 
 ## 📜 API Endpoints
 
-# -URL:https://alx-project-nexus-production-e3c4.up.railway.app/
+[-URL](https://alx-project-nexus-production-e3c4.up.railway.app/)
 
 -Movies
 
-*GET /api/movies/trending/ — trending movies*
+GET /api/movies/trending/ — trending movies
 
-**GET /api/movies/recommended/ — recommended movies**
+GET /api/movies/recommended/ — recommended movies
 
-## -Users
+-Users
 
-**POST /api/users/register/ — register user**
+    POST /api/users/register/ — register user
 
-*POST /api/users/login/ — get JWT tokens*
+    POST /api/users/login/ — get JWT tokens
 
-*POST /api/users/token/refresh/ — refresh JWT token*
+    POST /api/users/token/refresh/ — refresh JWT token
 
-**GET /api/users/favorites/ — list favorites*
+    GET /api/users/favorites/ — list favorites
 
-**POST /api/users/favorites/ — add favorite*
+    POST /api/users/favorites/ — add favorite
 
-*DELETE /api/users/favorites/<movie_id>/ — remove favorite*
+    DELETE /api/users/favorites/<movie_id>/ — remove favorite
 
-## -Documentation
+-Documentation
 
-*GET /api/docs/ — Swagger UI*
-
+\tGET /api/docs/ — Swagger UI*
