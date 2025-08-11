@@ -1,12 +1,19 @@
 from django.db import models
-
+import uuid
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
-    pass  # Extend later if needed
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    phone_number = models.IntegerField()
 
 class FavoriteMovie(models.Model):
+    favoritemovie_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4, 
+        editable=False
+        )
     user = models.ForeignKey(User, related_name='favorites', on_delete=models.CASCADE)
     movie_id = models.IntegerField()
     title = models.CharField(max_length=255)

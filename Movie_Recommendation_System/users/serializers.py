@@ -7,18 +7,22 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'email']
+        fields = ['id',"first_name","last_name",
+                  "phone_number", 'username', 'email']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['first_name','last_name','username', 'email', 'password']
 
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            phone_number=validated_data['phone_number'],
             email=validated_data.get('email'),
             password=validated_data['password']
         )
@@ -27,4 +31,6 @@ class RegisterSerializer(serializers.ModelSerializer):
 class FavoriteMovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteMovie
-        fields = ['id', 'movie_id', 'title', 'poster_path', 'added_at']
+        fields = ['favoritemovie_id', 'movie_id', 'title', 
+                  'poster_path', 'added_at']
+        read_only_fields = fields
