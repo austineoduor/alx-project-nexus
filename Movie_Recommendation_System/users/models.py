@@ -22,11 +22,27 @@ class FavoriteMovie(models.Model):
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
     title = models.CharField(max_length=255, null=True,)
     poster_path = models.CharField(max_length=255, blank=True, null=True)
-    added_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('user', 'movie')
-        ordering = ['-added_at']
+        ordering = ['-updated_at']
 
     def __str__(self):
         return f"{self.user.username} - {self.movie.title}"
+    
+class MovieRating(models.Model):
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]  # 1–5 stars
+    user = models.ForeignKey(User, related_name='ratings', on_delete=models.CASCADE)
+    movie = models.ForeignKey(Movie, related_name='ratings', on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'movie')
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.user.username} rated {self.movie.title} - {self.rating}★"

@@ -1,4 +1,6 @@
+from django.db.models import Avg, Count
 from rest_framework import serializers
+from users.models import FavoriteMovie,MovieRating
 from .models import Movie
 
 
@@ -24,10 +26,33 @@ class TMDbMovieSerializer(serializers.Serializer):
     }
 
 class MovieSerializer(serializers.ModelSerializer):
+    # is_favorite = serializers.SerializerMethodField()
+    average_rating = serializers.SerializerMethodField()
+    ratings_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Movie
-        fields = ["id", "tmdb_id", "title", "poster_url"]
+        fields = ["id", "tmdb_id",
+                  "title", "poster_url",
+                  "release_date", "year",
+                  'average_rating','ratings_count']
+    
+
+    # def get_average_rating(self, obj):
+    #     ratings = MovieRating.objects.filter(movie=obj)
+    #     if ratings.exists():
+    #         return round(ratings.aggregate(models.Avg('rating'))['rating__avg'], 1)
+    #     return None
+
+    # def get_ratings_count(self, obj):
+    #     return MovieRating.objects.filter(movie=obj).count()
         
+    # def get_is_favorite(self, obj):
+    #     request = self.context.get('request')
+    #     if request and request.user.is_authenticated:
+    #         return FavoriteMovie.objects.filter(user=request.user, movie=obj).exists()
+    #     return False
+
     swagger_schema_fields = {
         "example": {
             "id": 1,

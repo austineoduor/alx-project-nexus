@@ -33,12 +33,13 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    # Admin page
     path('admin/', admin.site.urls),
 
-    # App endpoints
-    path("api/", include("movies.urls")),
-    path("api/", include("users.urls")),
-
+    # Apps endpoints
+    path('api/', include("users.urls")),
+    path('api/movies/', include("movies.urls")),
+    
     # Swagger & Redoc docs
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

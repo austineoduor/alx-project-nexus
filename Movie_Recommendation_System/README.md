@@ -59,27 +59,31 @@ cd alx-project-nexus/Movie_Recommendation_System/
 
 ## 📜 API Endpoints
 
-## -Movies
+-Movies
 
-GET /api/movies/trending/ — trending movies
+    GET /api/movies/trending/  →  trending movies
+    GET /api/movies/recommended/  → recommended movies
 
-GET /api/movies/recommended/ — recommended movies
+    GET /api/movies/?title=matrix
+    GET /api/movies/?tmdb_id=550
+    GET /api/movies/?year=1999
+    GET /api/movies/?year=2022,2023
+    GET /api/movies/?title=man&tmdb_id=56789
 
 -Users
 
-    POST /api/users/register/ — register user
-
-    POST /api/users/login/ — get JWT tokens
-
-    POST /api/users/token/refresh/ — refresh JWT token
-
-    GET /api/users/favorites/ — list favorites
-
-    POST /api/users/favorites/ — add favorite
-
-    DELETE /api/users/favorites/<movie_id>/ — remove favorite
+    POST /api/users/register/  →  register user
+    POST /api/users/login/  → get JWT tokens
+    POST /api/users/token/refresh/  →  refresh JWT token
+    POST /api/users/favorites/  →  add favorite
+    POST /api/movies/rate/  →   One rating per movie per user (updates instead of duplicates)
+    GET /api/favorites/?title=man → Favorites containing “man” in the title.
+    GET /api/favorites/?tmdb_id=12345 → Favorites for a specific movie.
+    GET /api/users/favorites/  →  list favorites
+    
+    DELETE /api/users/favorites/<movie_id>/ →  remove favorite
 
 -Documentation
 
-    GET /api/docs/ — Swagger UI
-
+    GET /api/docs/  →  Swagger UI
+    GET /api/redoc/  → redoc UI

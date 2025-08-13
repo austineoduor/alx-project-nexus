@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import FavoriteMovie, User
+from .models import FavoriteMovie, User, MovieRating
 from movies.models import Movie
 import uuid
 from django.contrib.auth import get_user_model
@@ -49,7 +49,7 @@ class FavoriteMovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteMovie
         fields = ['id', 'movie', 'title', 
-                  'poster_path', 'added_at']
+                  'poster_path', 'updated_at']
         read_only_fields = fields
 
     swagger_schema_fields = {
@@ -88,3 +88,16 @@ class AddFavoriteSerializer(serializers.Serializer):
         )
         favorite, created = FavoriteMovie.objects.get_or_create(user=user, movie=movie)
         return favorite
+    
+class MovieRatingSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5, help_text="Rating from 1 to 5 stars")
+    
+    class Meta:
+        model = MovieRating
+        fields = ['user','movie', 'rating', 'created_at','updated_at']
+        read_only_fields = ['user','movie', 'created_at','updated_at']
+        
+    def validate_rating(self, value):
+        if value < 1 or value > 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5.")
+        return value
