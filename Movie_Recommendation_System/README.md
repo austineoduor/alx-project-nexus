@@ -102,4 +102,4 @@ cd alx-project-nexus/Movie_Recommendation_System/
 -Documentation
 
     GET /api/docs/  →  Swagger UI
-    GET /api/redoc/  → redoc UI
+    GET /swagger/  → redoc UI
