@@ -1,0 +1,148 @@
+IMPROMENT TO BE DONE
+1. Recommendation Engine
+    Content-based filtering
+    Recommend movies similar to what the user has already favorited, using TMDb genres, keywords, or similarity scores.
+    Collaborative filtering
+    Recommend movies based on what similar users have liked (could use libraries like Surprise or lightfm later).
+
+2. ✅Search & Filtering
+    Search movies by title, genre, or release year.
+    Filter favorites list by genre or date added.
+
+3. ✅Watchlist Feature
+    Add a separate Watchlist model for movies the user plans to watch (not just favorites).
+
+4. User Profile Enhancements
+    Add profile picture uploads (via django-storages with S3 or local media).
+    Track total number of movies in favorites and watchlist.
+
+5. ✅Activity History
+    Keep logs of when users favorite/unfavorite a movie.
+    Display "Recently Added" and "Recently Removed" lists.
+
+6. ✅Ratings & Reviews
+    Allow users to rate movies (1–5 stars) and leave short reviews.
+    Aggregate ratings to show an average score per movie.
+
+7. ✅API Performance
+    Implement Redis caching for TMDb API calls.
+    Add pagination for large lists (favorites, search results).
+
+8. Security & Auth
+    Add email verification during signup.
+    Implement password reset and change password endpoints.
+
+9. UI/UX
+    Swagger is good for API docs, but you could add a simple React frontend to make it demo-friendly.
+
+10. Analytics Dashboard
+    Track:
+        Most favorited movies.
+        Most active users.
+        Top genres.
+    Display via /admin or a custom dashboard API.
+	
+	
+	
+	SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';
+	Test endpoints;
+	
+	-Movies
+
+    GET /api/movies/trending/  
+    GET /api/movies/recommended/
+
+    GET /api/movies/?title=matrix
+    GET /api/movies/?tmdb_id=550
+    GET /api/movies/?year=1999
+    GET /api/movies/?year=2022,2023
+    GET /api/movies/?title=man&tmdb_id=56789
+
+-Users
+
+    POST /api/users/register/  
+    POST /api/users/login/  
+    POST /api/users/token/refresh/  
+    POST /api/users/favorites/ 
+    POST /api/movies/rate/ 
+    POST /api/watchlist/ with { "movie": movie_id }   
+
+    GET /api/watchlist/
+    GET /api/favorites/?title=man 
+    GET /api/favorites/?tmdb_id=12345 
+    GET /api/users/favorites/
+    GET /api/favorites/recently→added/
+    GET /api/favorites/recently-removed/
+    GET /api/favorites/recently→added/?page=1&page_size=5
+    
+    DELETE /api/users/favorites/<movie_id>/
+    DELETE /api/watchlist/<id>/ 
+
+-Documentation
+
+    GET /api/docs/ 
+    GET /api/redoc/
+
+
+Got it ✅
+Here’s a **compact, chronological summary** of what we’ve built and fixed so far so you can close the tab without losing context.
+
+---
+
+## **Movie & TMDb Integration**
+
+* **Movie model** has `tmdb_id`, `title`, `overview`, `poster_path`.
+* **`fetch_tmdb_details` method** automatically pulls extra info from TMDb if `tmdb_id` is set.
+* **MovieSerializer** saves TMDb `id` into `tmdb_id` and relies on the model’s save method to fetch details.
+* **`MovieListCreateView`** modified so:
+
+  * If `id` exists in incoming JSON and `tmdb_id` not given → set `tmdb_id`.
+  * Prevent duplicates (`tmdb_id` unique check).
+  * Trigger model save for TMDb fetch.
+
+---
+
+## **Favorite Movies**
+
+* **AddFavoriteSerializer** accepts TMDb movie info (`tmdb_id`, `title`, `overview`, `poster_path`).
+* Inside `.create()`:
+
+  * `Movie.objects.get_or_create()` by `tmdb_id`.
+  * `FavoriteMovie.objects.get_or_create()` for `(user, movie)`.
+* Validation ensures `tmdb_id` exists before creation.
+* Fix for `null movie_id` error → serializer always attaches a valid `Movie` instance.
+
+---
+
+## **Rating Movies**
+
+* **RateMovieView** allows users to rate movies.
+* Validates that a movie exists for given `tmdb_id` before saving the rating.
+
+---
+
+## **Watchlist**
+
+* **WatchlistSerializer** only requires `tmdb_id`, `title`, `overview`, `poster_path` (no direct `movie_id` from client).
+* **WatchlistView**:
+
+  * Lists authenticated user’s watchlist.
+  * Allows adding a movie → `perform_create` auto-sets `user`.
+  * Swagger docs show full request body, not just `movie_id`.
+
+---
+
+## **Planned Improvement**
+
+* Option to require **only `tmdb_id`** in API calls → backend fetches `title`, `overview`, `poster_path` from TMDb automatically.
+
+---
+
+## **Outstanding**
+
+* Memory usage in browser is high due to long chat history — safest fix is **close tab and rejoin later with this summary**.
+* You’ll need to **paste this summary** back into the new chat so I instantly know where we left off.
+
+---
+
+Do you want me to **already rewrite Watchlist & FavoriteMovie serializers** so they work with only `tmdb_id` and auto-fetch the rest from TMDb? That way when you reopen, they’re ready.

@@ -1,8 +1,11 @@
-from rest_framework import serializers
-from .models import FavoriteMovie, User, MovieRating
-from movies.models import Movie
 import uuid
 from django.contrib.auth import get_user_model
+from django.shortcuts import get_object_or_404
+from movies.models import Movie
+from rest_framework import serializers
+from .models import( FavoriteMovie, User,
+                    MovieRating, FavoriteActivity,
+                    Watchlist)
 
 User = get_user_model()
 
@@ -48,8 +51,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class FavoriteMovieSerializer(serializers.ModelSerializer):
     class Meta:
         model = FavoriteMovie
-        fields = ['id', 'movie', 'title', 
-                  'poster_path', 'updated_at']
+        fields = ['id', 'movie', 'updated_at']
         read_only_fields = fields
 
     swagger_schema_fields = {
@@ -60,44 +62,102 @@ class FavoriteMovieSerializer(serializers.ModelSerializer):
         }
     }
 
+
 class AddFavoriteSerializer(serializers.Serializer):
     tmdb_id = serializers.IntegerField()
-    title = serializers.CharField()
-    overview = serializers.CharField(allow_blank=True, allow_null=True)
-    poster_path = serializers.CharField(allow_blank=True, allow_null=True)
-
     class Meta:
         model = FavoriteMovie
-        fields = ["tmdb_id"]
+        fields = ["tmdb_id",]
 
     swagger_schema_fields = {
         "example": {
-            "tmdb_id": 550
+            "tmdb_id": 550,
         }
     }
-    
+
+    def to_internal_value(self, data):
+        data = data.copy()
+        if "id" in data and "tmdb_id" not in data:
+            data["tmdb_id"] = data.pop("id")
+        else:
+            raise serializers.ValidationError({"tmdb_id": "This field is required."})
+        
+        allowed = set(self.fields.keys())  # keep only declared fields
+        filtered_data = {k: v for k, v in data.items() if k in allowed}
+        return super().to_internal_value(filtered_data)
+
     def create(self, validated_data):
         user = self.context["request"].user
+        tmdb_id = validated_data["tmdb_id"]
+
+        # Create or get the movie first
         movie, _ = Movie.objects.get_or_create(
-            tmdb_id=validated_data["tmdb_id"],
-            defaults={
-                "title": validated_data["title"],
-                "overview": validated_data["overview"],
-                "poster_path": validated_data.get("poster_path"),
-            },
+            tmdb_id=tmdb_id,
         )
-        favorite, created = FavoriteMovie.objects.get_or_create(user=user, movie=movie)
+
+        # Create favorite link
+        favorite, _ = FavoriteMovie.objects.get_or_create(user=user, movie=movie)
         return favorite
+    
     
 class MovieRatingSerializer(serializers.ModelSerializer):
     rating = serializers.IntegerField(min_value=1, max_value=5, help_text="Rating from 1 to 5 stars")
-    
+    movie = serializers.StringRelatedField(read_only=True)
+    tmdb_id = serializers.IntegerField(write_only=True)
+
     class Meta:
         model = MovieRating
-        fields = ['user','movie', 'rating', 'created_at','updated_at']
-        read_only_fields = ['user','movie', 'created_at','updated_at']
-        
+        fields = ['tmdb_id', 'rating', 'movie']
+
+    def validate(self, attrs):
+        tmdb_id = attrs.pop('movie', None)
+        if tmdb_id is None:
+            raise serializers.ValidationError({"movie": "This field is required."})
+
+        movie = get_object_or_404(Movie, tmdb_id=tmdb_id)
+        attrs['movie'] = movie
+        return attrs
+            
     def validate_rating(self, value):
         if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
+
+
+class FavoriteActivitySerializer(serializers.ModelSerializer):
+    movie_title = serializers.CharField(source="movie.title", read_only=True)
+
+    class Meta:
+        model = FavoriteActivity
+        fields = ['movie_title', 'action', 'timestamp']
+
+
+class WatchlistSerializer(serializers.ModelSerializer):
+    tmdb_id = serializers.IntegerField(write_only=True)
+    class Meta:
+        model = Watchlist
+        fields = ['id', 'movie', 'tmdb_id', 'added_at']
+        read_only_fields = ['id', 'movie', 'added_at']
+
+    def to_internal_value(self, data):
+        data = data.copy()
+        if "id" in data and "tmdb_id" not in data:
+            data["tmdb_id"] = data.pop("id")
+        else:
+            raise serializers.ValidationError({"tmdb_id": "This field is required."})
+        
+        allowed = set(self.fields.keys())  # keep only declared fields
+        filtered_data = {k: v for k, v in data.items() if k in allowed}
+        return super().to_internal_value(filtered_data)
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        tmdb_id = validated_data["tmdb_id"]
+
+        # Create or get the movie first
+        movie, _ = Movie.objects.get_or_create(
+            tmdb_id=tmdb_id,
+        )
+        # Create the watchlist entry
+        watchlist, _ = Watchlist.objects.get_or_create(user=user, movie=movie)
+        return watchlist

@@ -1,20 +1,30 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.conf import settings
+from django.db.models import Avg, Count
+from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from movies.pagination import LargeResultsSetPagination,FavoriteActivityPagination
 from rest_framework.views import APIView
 from rest_framework import generics, permissions, status, filters
 from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .filters import FavoriteMovieFilter
-from .models import FavoriteMovie,MovieRating
+from .models import (FavoriteMovie,MovieRating,
+                     FavoriteActivity,Watchlist,Movie)
+
 from .serializers import (RegisterSerializer,
                           AddFavoriteSerializer,
                           FavoriteMovieSerializer,
-                          MovieRatingSerializer)
+                          MovieRatingSerializer,
+                          FavoriteActivitySerializer,
+                          WatchlistSerializer)
 
 User = get_user_model()
+CACHE_TIMEOUT = getattr(settings, "CACHE_TIMEOUT", 60 * 5)
 
 class RegisterView(generics.CreateAPIView):
     """
@@ -101,6 +111,8 @@ class FavoriteMovieListView(generics.ListAPIView):
     """
     serializer_class = FavoriteMovieSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = LargeResultsSetPagination
+
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = FavoriteMovieFilter
     search_fields = ["title"]
@@ -108,8 +120,19 @@ class FavoriteMovieListView(generics.ListAPIView):
 
     def get_queryset(self):
         # Only return the authenticated user's favorites
-        return FavoriteMovie.objects.filter(user=self.request.user)
+        cache_key = f"favorites_{self.request.user.id}_{self.request.get_full_path()}"
+        cached_qs = cache.get(cache_key)
+        if cached_qs is not None:
+            return cached_qs
+        queryset = FavoriteMovie.objects.filter(user=self.request.user).select_related('movie')
 
+        # Optional search filter on title
+        title = self.request.query_params.get('title')
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+
+        cache.set(cache_key, queryset, CACHE_TIMEOUT)
+        return queryset
     @swagger_auto_schema(
         operation_description="Get favorite movies. Optional filtering by title or TMDB ID.",
         tags=["movies"],
@@ -120,6 +143,14 @@ class FavoriteMovieListView(generics.ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+    @staticmethod
+    def invalidate_user_cache(user_id):
+        """
+        Clears all cache entries for this user's favorites.
+        """
+        # If you use a consistent prefix for all favorites cache keys,
+        # you can delete them by pattern if supported by your cache backend.
+        cache.delete_pattern(f"favorites_{user_id}_*")
 
 class FavoriteMovieDeleteView(APIView):
     """
@@ -156,8 +187,6 @@ class RateMovieView(generics.CreateAPIView):
     serializer_class = MovieRatingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-
-
     @swagger_auto_schema(
         operation_description="Rate a movie between 1 and 5 stars. Updates if rating exists.",
         responses={
@@ -175,21 +204,22 @@ class RateMovieView(generics.CreateAPIView):
             401: "Authentication required"
         }
     )
+
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        tmdb_id = request.data.get('tmdb_id')
+        rating = request.data.get('rating')
 
-        movie = serializer.validated_data['movie']
-        rating = serializer.validated_data['rating']
+        if not tmdb_id or not rating:
+            return Response({"detail": "tmdb_id and rating are required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update or create rating
+        movie = get_object_or_404(Movie, tmdb_id=tmdb_id)
+
         MovieRating.objects.update_or_create(
             user=request.user,
             movie=movie,
             defaults={'rating': rating}
         )
 
-        # Calculate new stars
         stars = MovieRating.objects.filter(movie=movie).aggregate(
             average_rating=Avg('rating'),
             ratings_count=Count('id')
@@ -200,5 +230,88 @@ class RateMovieView(generics.CreateAPIView):
             "average_rating": round(stars['average_rating'], 2) if stars['average_rating'] else None,
             "ratings_count": stars['ratings_count']
         }, status=status.HTTP_200_OK)
+class RecentlyAddedFavoritesView(generics.ListAPIView):
+    serializer_class = FavoriteActivitySerializer
+    pagination_class = FavoriteActivityPagination
+    permission_classes = [permissions.IsAuthenticated]
 
-    #     # serializer.save(user=self.request.user)
+
+    @swagger_auto_schema(
+        operation_description="Get a paginated list of recently added favorite movies.",
+        tags=["favorites"],
+        manual_parameters=[
+            openapi.Parameter(
+                'page', openapi.IN_QUERY, description="Page number", type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'page_size', openapi.IN_QUERY, description="Number of items per page (max 50)", type=openapi.TYPE_INTEGER
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    def get_queryset(self):
+        return FavoriteActivity.objects.filter(
+            user=self.request.user,
+            action='added'
+        )[:10]  # latest 10
+
+class RecentlyRemovedFavoritesView(generics.ListAPIView):
+    serializer_class = FavoriteActivitySerializer
+    pagination_class = FavoriteActivityPagination
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Get a paginated list of recently removed favorite movies.",
+        tags=["favorites"],
+        manual_parameters=[
+            openapi.Parameter(
+                'page', openapi.IN_QUERY, description="Page number", type=openapi.TYPE_INTEGER
+            ),
+            openapi.Parameter(
+                'page_size', openapi.IN_QUERY, description="Number of items per page (max 50)", type=openapi.TYPE_INTEGER
+            )
+        ]
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        return FavoriteActivity.objects.filter(
+            user=self.request.user,
+            action='removed'
+        )[:10]
+    
+class WatchlistView(generics.ListCreateAPIView):
+    serializer_class = WatchlistSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Watchlist.objects.filter(user=self.request.user)
+
+    @swagger_auto_schema(
+        operation_description="Get your current watchlist or add a movie to it.",
+        tags=["watchlist"],
+        request_body=WatchlistSerializer,  # <- So Swagger shows full movie input
+        responses={200: WatchlistSerializer(many=True)}
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class WatchlistRemoveView(generics.DestroyAPIView):
+    serializer_class = WatchlistSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = 'pk'
+
+    @swagger_auto_schema(
+        operation_description="Remove a movie from your watchlist",
+        tags=["watchlist"],
+        responses={204: 'Movie removed from watchlist'}
+    )
+    def delete(self, request, *args, **kwargs):
+        return super().delete(request, *args, **kwargs)
+    def get_queryset(self):
+        return Watchlist.objects.filter(user=self.request.user)

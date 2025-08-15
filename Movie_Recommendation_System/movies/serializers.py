@@ -29,36 +29,59 @@ class MovieSerializer(serializers.ModelSerializer):
     # is_favorite = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     ratings_count = serializers.SerializerMethodField()
+    tmdb_id = serializers.IntegerField(required=False)
 
     class Meta:
         model = Movie
-        fields = ["id", "tmdb_id",
-                  "title", "poster_url",
-                  "release_date", "year",
-                  'average_rating','ratings_count']
+        fields = [
+            "id",
+            "tmdb_id",
+            "title",
+            "poster_url",
+            "release_date",
+            "year",
+            'average_rating',
+            'ratings_count',
+        ]
+    def get_average_rating(self, obj):
+        return getattr(obj, "average_rating", None)
+
+    def get_ratings_count(self, obj):
+        return getattr(obj, "ratings_count", 0)
     
+    def to_internal_value(self, data):
+        """
+        Override to:
+        - Map TMDb 'id' -> tmdb_id
+        - Ignore unknown fields
+        - Convert poster_path to poster_url
+        """
+        data = data.copy()
 
-    # def get_average_rating(self, obj):
-    #     ratings = MovieRating.objects.filter(movie=obj)
-    #     if ratings.exists():
-    #         return round(ratings.aggregate(models.Avg('rating'))['rating__avg'], 1)
-    #     return None
+        # Map 'id' to 'tmdb_id'
+        if "id" in data and "tmdb_id" not in data:
+            data["tmdb_id"] = data.pop("id")
 
-    # def get_ratings_count(self, obj):
-    #     return MovieRating.objects.filter(movie=obj).count()
-        
-    # def get_is_favorite(self, obj):
-    #     request = self.context.get('request')
-    #     if request and request.user.is_authenticated:
-    #         return FavoriteMovie.objects.filter(user=request.user, movie=obj).exists()
-    #     return False
+        # Map 'poster_path' to full URL if available
+        if "poster_path" in data and "poster_url" not in data:
+            data["poster_url"] = f"https://image.tmdb.org/t/p/w500{data['poster_path']}"
+
+        # Remove TMDb fields we don't store
+        allowed = set(self.fields.keys())  # only keep serializer fields
+        filtered_data = {k: v for k, v in data.items() if k in allowed}
+
+        return super().to_internal_value(filtered_data)
 
     swagger_schema_fields = {
         "example": {
             "id": 1,
             "tmdb_id": 550,
             "title": "Fight Club",
-            "poster_url": "/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg"
+            "poster_url": "https://image.tmdb.org/t/p/w500/bptfVGEQuv6vDTIMVCHjJ9Dz8PX.jpg",
+            "release_date": "1999-10-15",
+            "year": 1999,
+            "average_rating": 4.5,
+            "ratings_count": 123
         }
     }
         

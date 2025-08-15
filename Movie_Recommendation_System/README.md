@@ -16,6 +16,11 @@ A Django + DRF backend for a movie recommendation app, integrating TMDb API for 
 - TMDb API
 - drf-yasg (Swagger)
 
+### Superuser Details
+- username:austi
+- email: austi@gmail.com
+- password austi123@#
+
 ### Explore the hosted backend
     ** copy and paste on a browser
     [URL: ](https://alx-project-nexus-production-e3c4.up.railway.app/)
@@ -61,9 +66,12 @@ cd alx-project-nexus/Movie_Recommendation_System/
 
 -Movies
 
+    
     GET /api/movies/trending/  →  trending movies
-    GET /api/movies/recommended/  → recommended movies
+    GET /api/movies/recommended/?title=title → recommended movies by title
+    GET /api/movies/recommended/<movie_id>  → recommended movies by id
 
+    GET /api/movies/  →  lists movies
     GET /api/movies/?title=matrix
     GET /api/movies/?tmdb_id=550
     GET /api/movies/?year=1999
@@ -72,16 +80,24 @@ cd alx-project-nexus/Movie_Recommendation_System/
 
 -Users
 
-    POST /api/users/register/  →  register user
-    POST /api/users/login/  → get JWT tokens
-    POST /api/users/token/refresh/  →  refresh JWT token
-    POST /api/users/favorites/  →  add favorite
+    POST /api/auth/register/  →  register user
+    POST /api/auth/login/  → get JWT tokens
+    POST /api/auth/token/refresh/  →  refresh JWT token
+    POST /api/favorites/create/  →  add favorite
+    POST /api/favorites/add/  →  add favorite
     POST /api/movies/rate/  →   One rating per movie per user (updates instead of duplicates)
+    POST /api/watchlist/?data={ "movie": movie_id} → Add to Watchlist  
+
+    GET /api/watchlist/ →  View Watchlist
+    GET /api//favorites/  →  list favorites
     GET /api/favorites/?title=man → Favorites containing “man” in the title.
     GET /api/favorites/?tmdb_id=12345 → Favorites for a specific movie.
-    GET /api/users/favorites/  →  list favorites
+    GET /api/favorites/recently→added/
+    GET /api/favorites/recently-removed/
+    GET /api/favorites/recently-added/?page=1&page_size=5
     
-    DELETE /api/users/favorites/<movie_id>/ →  remove favorite
+    DELETE /api/favorites/<movie_id>/ →  remove favorite
+    DELETE /api/watchlist/<id>/ →  Remove from Watchlist
 
 -Documentation
 

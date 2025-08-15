@@ -1,9 +1,13 @@
 from django.urls import path
-from .views import TrendingMoviesView, RecommendedMoviesView, MovieListView
+from .views import (TrendingMoviesView,
+                    RecommendedMoviesView,
+                    MovieListCreateView,
+                    ClearCacheView)
 
 urlpatterns = [
-    path('list/', MovieListView.as_view(), name='movie-list'),
+    path('', MovieListCreateView.as_view(), name='movie-list'),
     path('trending/', TrendingMoviesView.as_view(), name='trending-movies'),
     path('recommended/', RecommendedMoviesView.as_view(), name="recommended_movies"),
-    path('recommended/<int:movie_id>/', RecommendedMoviesView.as_view(), name='recommended-movies'),
+    path('recommended/<int:movie_id>/', RecommendedMoviesView.as_view(), name='recommended-movie'),
+    path('cache/clear/', ClearCacheView.as_view(), name='clear-cache'),
 ]

@@ -22,6 +22,8 @@ class Movie(models.Model):
         if self.release_date:
             self.year = self.release_date.year
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return self.title
+        class Meta:
+            unique_together = ('tmdb_id', 'title')
+            ordering = ['-year']
+        def __str__(self):
+            return self.title
